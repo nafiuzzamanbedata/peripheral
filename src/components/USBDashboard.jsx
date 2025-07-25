@@ -27,7 +27,7 @@ const USBDashboard = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [socket, setSocket] = useState(null);
+    const [socketInstance, setSocketInstance] = useState(null);
     const [stats, setStats] = useState(null);
     const [notifications, setNotifications] = useState([]);
 
@@ -36,15 +36,15 @@ const USBDashboard = () => {
 
     // Initialize WebSocket connection
     const initializeSocket = useCallback(() => {
-        if (socket) {
-            socket.disconnect();
-        }
 
         const newSocket = io(API_BASE, {
             reconnection: true,
             reconnectionDelay: 1000,
             reconnectionAttempts: 5,
-            timeout: 20000
+            timeout: 20000,
+            transports: ['websocket', 'polling'],
+            pingTimeout: 30000,
+            pingInterval: 25000
         });
 
         // Connection events
@@ -122,10 +122,10 @@ const USBDashboard = () => {
             addNotification(`Error: ${data.message}`, 'error');
         });
 
-        setSocket(newSocket);
+        setSocketInstance(newSocket);
 
         return newSocket;
-    }, [API_BASE, socket]);
+    }, [API_BASE]);
 
     // Add notification
     const addNotification = (message, type = 'info') => {
@@ -173,8 +173,8 @@ const USBDashboard = () => {
     // Refresh devices
     const refreshDevices = async () => {
         try {
-            if (socket && isConnected) {
-                socket.emit('devices:refresh');
+            if (socketInstance && isConnected) {
+                socketInstance.emit('devices:refresh');
             } else {
                 await axios.post(`${API_BASE}/api/devices/refresh`);
                 await fetchInitialData();
