@@ -266,10 +266,6 @@
     border-left: 4px solid var(--success);
 }
 
-.overview-card.disconnected {
-    border-left: 4px solid var(--error);
-}
-
 .overview-card.activity {
     border-left: 4px solid var(--primary);
 }
@@ -291,7 +287,8 @@
 
 .devices-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+    /* Two columns for connected devices */
     gap: 1rem;
     padding: 1rem;
     max-width: 1200px;
@@ -544,10 +541,6 @@
     border-left: 4px solid var(--success);
 }
 
-.device-card.disconnected {
-    border-left: 4px solid var(--error);
-}
-
 .device-card-header {
     display: flex;
     justify-content: space-between;
@@ -593,11 +586,6 @@
 
 .status-indicator.connected {
     background: var(--success);
-    color: white;
-}
-
-.status-indicator.disconnected {
-    background: var(--error);
     color: white;
 }
 
@@ -930,6 +918,7 @@
 
     .devices-grid {
         grid-template-columns: 1fr;
+        /* Single column on mobile */
     }
 
     .status-grid {

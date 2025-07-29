@@ -77,7 +77,21 @@
     gap: 1rem;
 }
 
-.detail-row,
+.device-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    /* spacing between each detail-row */
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    /* spacing between icon, label, and value */
+    font-size: 14px;
+}
+
 .connection-detail {
     display: flex;
     align-items: center;
@@ -105,5 +119,16 @@
 @media (max-width: 768px) {
     .device-card-body {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 769px) {
+    .device-details {
+        grid-column: span 2;
+    }
+
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
