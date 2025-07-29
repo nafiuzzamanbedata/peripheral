@@ -159,11 +159,11 @@ const ConnectionHistory = ({ history }) => {
 								<div className="history-main">
 									<div className="device-info">
 										<Usb size={14} className="device-icon" />
-										<span className="device-name">{entry.productName || 'Unknown Device'}</span>
+										<span className="device-name">{entry.device.productName || 'Unknown Device'}</span>
 										<span className="event-type">{getEventText(entry.eventType)}</span>
 									</div>
 									<div className="device-details">
-										<span className="manufacturer">{entry.manufacturer || 'Unknown'}</span>
+										<span className="manufacturer">{entry.device.manufacturer || 'Unknown'}</span>
 										{entry.vendorId && entry.productId && (
 											<span className="device-ids" onClick={() => copyToClipboard(`${entry.vendorId}:${entry.productId}`)}>
 												<Hash size={12} />

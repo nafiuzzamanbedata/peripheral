@@ -86,7 +86,7 @@
 
 .detail-row {
     display: flex;
-    align-items: center;
+    align-items: start;
     gap: 0.5rem;
     /* spacing between icon, label, and value */
     font-size: 14px;
@@ -128,7 +128,7 @@
     }
 
     .detail-row {
-        flex-direction: column;
+        flex-direction: row;
         align-items: flex-start;
     }
 }
