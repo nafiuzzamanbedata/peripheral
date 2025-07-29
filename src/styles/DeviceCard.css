@@ -1,0 +1,109 @@
+.device-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.device-card:hover {
+    transform: scale(1.02);
+}
+
+.device-card.connected {
+    border-left: 4px solid #16a34a;
+}
+
+.device-card.disconnected {
+    border-left: 4px solid #dc2626;
+}
+
+.device-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.device-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.device-icon {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.emoji-icon {
+    font-size: 24px;
+}
+
+.device-name h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.manufacturer {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.status-indicator.connected {
+    background: #16a34a;
+    color: white;
+}
+
+.status-indicator.disconnected {
+    background: #dc2626;
+    color: white;
+}
+
+.device-card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.detail-row,
+.connection-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 14px;
+    margin-bottom: 0.5rem;
+}
+
+.detail-value {
+    cursor: pointer;
+}
+
+.detail-value:hover {
+    text-decoration: underline;
+}
+
+.device-card-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .device-card-body {
+        grid-template-columns: 1fr;
+    }
+}

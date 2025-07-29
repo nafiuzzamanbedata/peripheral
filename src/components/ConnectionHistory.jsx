@@ -1,29 +1,17 @@
-import {
-  Calendar,
-  CheckCircle,
-  Clock,
-  Filter,
-  Hash,
-  Usb,
-  XCircle
-} from 'lucide-react';
+import { Calendar, CheckCircle, Clock, Filter, Hash, Usb, XCircle } from 'lucide-react';
 import { useState } from 'react';
+import '../styles/ConnectionHistory.css';
 
 const ConnectionHistory = ({ history }) => {
   const [filter, setFilter] = useState('all'); // all, connect, disconnect
   const [timeFilter, setTimeFilter] = useState('all'); // all, today, week
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
 
-  // Filter history based on selected filters
-  const filteredHistory = history.filter(entry => {
-    // Event type filter
-    if (filter !== 'all' && entry.eventType !== filter) {
-      return false;
-    }
-
-    // Time filter
+  const filteredHistory = history.filter((entry) => {
+    if (filter !== 'all' && entry.eventType !== filter) return false;
     const entryTime = new Date(entry.timestamp);
     const now = new Date();
-
     if (timeFilter === 'today') {
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       if (entryTime < today) return false;
@@ -31,9 +19,10 @@ const ConnectionHistory = ({ history }) => {
       const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
       if (entryTime < weekAgo) return false;
     }
-
     return true;
   });
+
+  const paginatedHistory = filteredHistory.slice(0, page * itemsPerPage);
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
@@ -42,35 +31,40 @@ const ConnectionHistory = ({ history }) => {
     const diffMins = Math.floor(diffMs / (1000 * 60));
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
-
     return date.toLocaleDateString();
   };
 
-  const formatFullTime = (timestamp) => {
-    return new Date(timestamp).toLocaleString();
-  };
+  const formatFullTime = (timestamp) => new Date(timestamp).toLocaleString();
 
-  const getEventIcon = (eventType) => {
-    return eventType === 'connect' ? (
+  const getEventIcon = (eventType) => (
+    eventType === 'connect' ? (
       <CheckCircle size={16} className="event-icon connect" />
     ) : (
       <XCircle size={16} className="event-icon disconnect" />
-    );
+    )
+  );
+
+  const getEventText = (eventType) => (eventType === 'connect' ? 'Connected' : 'Disconnected');
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    window.dispatchEvent(new CustomEvent('addNotification', { detail: { message: 'Device ID copied!', type: 'info' } }));
   };
 
-  const getEventText = (eventType) => {
-    return eventType === 'connect' ? 'Connected' : 'Disconnected';
+  const resetFilters = () => {
+    setFilter('all');
+    setTimeFilter('all');
+    setPage(1);
   };
 
   if (!history || history.length === 0) {
     return (
       <div className="history-empty">
-        <Clock size={48} className="empty-icon" />
+        <Clock size={48} className="empty-icon animate-bounce" />
         <h3>No connection history</h3>
         <p>Device connection events will appear here</p>
       </div>
@@ -79,97 +73,111 @@ const ConnectionHistory = ({ history }) => {
 
   return (
     <div className="connection-history">
-      {/* Filters */}
       <div className="history-filters">
         <div className="filter-group">
           <Filter size={16} />
-          <label>Event Type:</label>
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">All Events</option>
-            <option value="connect">Connections</option>
-            <option value="disconnect">Disconnections</option>
-          </select>
+          <span className="filter-label">Event Type:</span>
+          <div className="filter-buttons">
+            <button
+              className={`btn btn-filter ${filter === 'all' ? 'active' : ''}`}
+              onClick={() => setFilter('all')}
+              aria-label="Show all events"
+            >
+              All
+            </button>
+            <button
+              className={`btn btn-filter ${filter === 'connect' ? 'active' : ''}`}
+              onClick={() => setFilter('connect')}
+              aria-label="Show connection events"
+            >
+              Connections
+            </button>
+            <button
+              className={`btn btn-filter ${filter === 'disconnect' ? 'active' : ''}`}
+              onClick={() => setFilter('disconnect')}
+              aria-label="Show disconnection events"
+            >
+              Disconnections
+            </button>
+          </div>
         </div>
-
         <div className="filter-group">
           <Calendar size={16} />
-          <label>Time Range:</label>
-          <select
-            value={timeFilter}
-            onChange={(e) => setTimeFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">All Time</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-          </select>
+          <span className="filter-label">Time Range:</span>
+          <div className="filter-buttons">
+            <button
+              className={`btn btn-filter ${timeFilter === 'all' ? 'active' : ''}`}
+              onClick={() => setTimeFilter('all')}
+              aria-label="Show all time"
+            >
+              All Time
+            </button>
+            <button
+              className={`btn btn-filter ${timeFilter === 'today' ? 'active' : ''}`}
+              onClick={() => setTimeFilter('today')}
+              aria-label="Show today"
+            >
+              Today
+            </button>
+            <button
+              className={`btn btn-filter ${timeFilter === 'week' ? 'active' : ''}`}
+              onClick={() => setTimeFilter('week')}
+              aria-label="Show this week"
+            >
+              This Week
+            </button>
+          </div>
         </div>
-
+        <button className="btn btn-secondary" onClick={resetFilters} aria-label="Reset filters">
+          Clear Filters
+        </button>
         <div className="history-stats">
-          <span className="stat">
-            {filteredHistory.length} events
-          </span>
+          <span className="stat">{filteredHistory.length} events</span>
         </div>
       </div>
 
-      {/* History List */}
       <div className="history-list">
-        {filteredHistory.length === 0 ? (
+        {paginatedHistory.length === 0 ? (
           <div className="no-results">
             <p>No events match the selected filters</p>
+            <button className="btn btn-primary" onClick={resetFilters}>
+              Clear Filters
+            </button>
           </div>
         ) : (
-          filteredHistory.map((entry) => (
+          paginatedHistory.map((entry) => (
             <div
               key={entry.id}
               className={`history-item ${entry.eventType}`}
               title={formatFullTime(entry.timestamp)}
+              role="button"
+              tabIndex={0}
+              onClick={() => window.dispatchEvent(new CustomEvent('setFilter', { detail: entry.deviceId }))}
             >
-              {/* Event Icon & Type */}
-              <div className="history-icon">
-                {getEventIcon(entry.eventType)}
-              </div>
-
-              {/* Device Info */}
+              <div className="history-icon">{getEventIcon(entry.eventType)}</div>
               <div className="history-content">
                 <div className="history-main">
                   <div className="device-info">
                     <Usb size={14} className="device-icon" />
-                    <span className="device-name">
-                      {entry.device.productName || 'Unknown Device'}
-                    </span>
-                    <span className="event-type">
-                      {getEventText(entry.eventType)}
-                    </span>
+                    <span className="device-name">{entry.productName || 'Unknown Device'}</span>
+                    <span className="event-type">{getEventText(entry.eventType)}</span>
                   </div>
-
                   <div className="device-details">
-                    <span className="manufacturer">
-                      {entry.device.manufacturer}
-                    </span>
-                    {entry.device.vendorId && entry.device.productId && (
-                      <span className="device-ids">
+                    <span className="manufacturer">{entry.manufacturer || 'Unknown'}</span>
+                    {entry.vendorId && entry.productId && (
+                      <span className="device-ids" onClick={() => copyToClipboard(`${entry.vendorId}:${entry.productId}`)}>
                         <Hash size={12} />
-                        {entry.device.vendorId.toString(16).padStart(4, '0')}:
-                        {entry.device.productId.toString(16).padStart(4, '0')}
+                        {entry.vendorId.toString(16).padStart(4, '0')}:{entry.productId.toString(16).padStart(4, '0')}
                       </span>
                     )}
                   </div>
                 </div>
-
-                {/* Timestamp */}
                 <div className="history-time">
                   <Clock size={12} />
                   <span className="time-ago">{formatTime(entry.timestamp)}</span>
                   <span className="full-time">{formatFullTime(entry.timestamp)}</span>
                 </div>
               </div>
-
-              {/* Status Indicator */}
               <div className={`history-status ${entry.eventType}`}>
                 <div className="status-dot"></div>
               </div>
@@ -178,11 +186,10 @@ const ConnectionHistory = ({ history }) => {
         )}
       </div>
 
-      {/* Load More (if needed) */}
-      {history.length > 20 && (
+      {filteredHistory.length > paginatedHistory.length && (
         <div className="history-footer">
-          <button className="btn btn-secondary">
-            Load More History
+          <button className="btn btn-primary" onClick={() => setPage(page + 1)} aria-label="Load more history">
+            Load More
           </button>
         </div>
       )}

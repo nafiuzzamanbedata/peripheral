@@ -1,58 +1,39 @@
-import {
-  Building,
-  Calendar,
-  CheckCircle,
-  Clock,
-  Cpu,
-  Hash,
-  Usb,
-  XCircle
-} from 'lucide-react';
+import { Building, Calendar, CheckCircle, Clock, Cpu, Hash, Usb, XCircle } from 'lucide-react';
+import '../styles/DeviceCard.css';
 
 const DeviceCard = ({ device }) => {
-  const formatTime = (timestamp) => {
-    if (!timestamp) return 'Unknown';
-    return new Date(timestamp).toLocaleString();
-  };
+  const formatTime = (timestamp) => (timestamp ? new Date(timestamp).toLocaleString() : 'Unknown');
 
   const formatDuration = (connectedAt, disconnectedAt) => {
     if (!connectedAt) return null;
-
     const start = new Date(connectedAt);
     const end = disconnectedAt ? new Date(disconnectedAt) : new Date();
     const duration = end - start;
-
     const seconds = Math.floor(duration / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
-
-    if (hours > 0) {
-      return `${hours}h ${minutes % 60}m`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${seconds % 60}s`;
-    } else {
-      return `${seconds}s`;
-    }
+    return hours > 0 ? `${hours}h ${minutes % 60}m` : minutes > 0 ? `${minutes}m ${seconds % 60}s` : `${seconds}s`;
   };
 
   const getDeviceIcon = (device) => {
-    // You can customize this based on device type/vendor
     const vendorId = device.vendorId;
+    if (vendorId === 0x05ac) return '🍎';
+    if (vendorId === 0x046d) return '🖱️';
+    if (vendorId === 0x04d8) return '🔧';
+    if (vendorId === 0x413c) return '💻';
+    return '🔌';
+  };
 
-    if (vendorId === 0x05ac) return '🍎'; // Apple
-    if (vendorId === 0x046d) return '🖱️'; // Logitech (mouse/keyboard)
-    if (vendorId === 0x04d8) return '🔧'; // Microchip
-    if (vendorId === 0x413c) return '💻'; // Dell
-
-    return '🔌'; // Default USB icon
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    window.dispatchEvent(new CustomEvent('addNotification', { detail: { message: 'Copied to clipboard!', type: 'info' } }));
   };
 
   const isConnected = device.status === 'connected';
   const duration = formatDuration(device.connectedAt, device.disconnectedAt);
 
   return (
-    <div className={`device-card ${device.status}`}>
-      {/* Card Header */}
+    <div className={`device-card ${device.status}`} role="button" tabIndex={0} onClick={() => alert('Show device details modal')}>
       <div className="device-card-header">
         <div className="device-info">
           <div className="device-icon">
@@ -64,31 +45,25 @@ const DeviceCard = ({ device }) => {
             <p className="manufacturer">{device.manufacturer}</p>
           </div>
         </div>
-
-        <div className={`status-indicator ${device.status}`}>
+        <div className={`status-indicator ${device.status}`} aria-label={isConnected ? 'Device connected' : 'Device disconnected'}>
           {isConnected ? (
-            <CheckCircle size={20} className="status-icon connected" />
+            <CheckCircle size={20} className="status-icon connected animate-pulse" />
           ) : (
             <XCircle size={20} className="status-icon disconnected" />
           )}
-          <span className="status-text">
-            {isConnected ? 'Connected' : 'Disconnected'}
-          </span>
+          <span className="status-text">{isConnected ? 'Connected' : 'Disconnected'}</span>
         </div>
       </div>
 
-      {/* Card Body */}
       <div className="device-card-body">
-        {/* Device Details */}
         <div className="device-details">
           <div className="detail-row">
             <Hash size={14} />
             <span className="detail-label">Device ID:</span>
-            <span className="detail-value" title={device.id}>
+            <span className="detail-value" title={device.id} onClick={() => copyToClipboard(device.id)}>
               {device.id.length > 20 ? `${device.id.substring(0, 20)}...` : device.id}
             </span>
           </div>
-
           <div className="detail-row">
             <Cpu size={14} />
             <span className="detail-label">Vendor/Product:</span>
@@ -97,17 +72,15 @@ const DeviceCard = ({ device }) => {
               {device.productId ? `0x${device.productId.toString(16).padStart(4, '0')}` : 'N/A'}
             </span>
           </div>
-
           {device.serialNumber && (
             <div className="detail-row">
               <Building size={14} />
               <span className="detail-label">Serial:</span>
-              <span className="detail-value">{device.serialNumber}</span>
+              <span className="detail-value" onClick={() => copyToClipboard(device.serialNumber)}>{device.serialNumber}</span>
             </div>
           )}
         </div>
 
-        {/* Connection Info */}
         <div className="connection-info">
           {device.connectedAt && (
             <div className="connection-detail">
@@ -118,7 +91,6 @@ const DeviceCard = ({ device }) => {
               </div>
             </div>
           )}
-
           {device.disconnectedAt && (
             <div className="connection-detail">
               <XCircle size={14} />
@@ -128,7 +100,6 @@ const DeviceCard = ({ device }) => {
               </div>
             </div>
           )}
-
           {duration && (
             <div className="connection-detail">
               <Clock size={14} />
@@ -141,13 +112,11 @@ const DeviceCard = ({ device }) => {
         </div>
       </div>
 
-      {/* Card Footer */}
       <div className="device-card-footer">
         <div className="last-seen">
           <span className="last-seen-label">Last seen:</span>
           <span className="last-seen-time">{formatTime(device.lastSeen)}</span>
         </div>
-
         {device.locationId && (
           <div className="location-info">
             <span className="location-label">Location:</span>
